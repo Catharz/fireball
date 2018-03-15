@@ -24,4 +24,18 @@ defmodule FireballWeb.Router do
   # scope "/api", FireballWeb do
   #   pipe_through :api
   # end
+
+  pipeline :graphql do
+    plug :accepts, ["json"]
+  end
+
+  scope "/graphql" do
+    pipe_through :graphql
+
+    forward "/", Absinthe.Plug, schema: FireballWeb.Schema
+  end
+
+  forward "/graphiql", Absinthe.Plug.GraphiQL,
+    schema: FireballWeb.Schema,
+    interface: :advanced
 end
