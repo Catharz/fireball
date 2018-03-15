@@ -5,7 +5,7 @@ defmodule Fireball.Mixfile do
     [
       app: :fireball,
       version: "0.0.1",
-      elixir: "~> 1.4",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:elixir_script],
       start_permanent: Mix.env() == :prod,
@@ -41,10 +41,14 @@ defmodule Fireball.Mixfile do
       {:phoenix_pubsub, "~> 1.0"},
       {:phoenix_ecto, "~> 3.2"},
       {:mariaex, ">= 0.0.0"},
-      {:phoenix_html, "~> 2.10"},
+      {:phoenix_html, "~> 2.10.5"},
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
+      {:absinthe, "~> 1.4.6"},
+      {:absinthe_plug, "~> 1.4.2"},
+      {:absinthe_phoenix, "~> 1.4.2"},
+      {:timex, "~> 3.2.1"},
       {:elixir_script, "~> 0.32"}
     ]
   end
