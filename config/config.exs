@@ -6,16 +6,14 @@
 use Mix.Config
 
 # General application configuration
-config :fireball,
-  ecto_repos: [Fireball.Repo]
+config :fireball, ecto_repos: [Fireball.Repo]
 
 # Configures the endpoint
 config :fireball, FireballWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "IPNQJwNSIhefI0xlS+gfVRk+rj8zUZ7sDUGq9Vub472hZAj0LTTZopth5QshHSVO",
   render_errors: [view: FireballWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Fireball.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Fireball.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -24,4 +22,4 @@ config :logger, :console,
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

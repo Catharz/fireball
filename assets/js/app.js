@@ -19,3 +19,5 @@ import "phoenix_html"
 // paths "./socket" or full ones "web/static/js/socket".
 
 // import socket from "./socket"
+import Fireball from './build/Elixir.Fireball.js'
+Fireball.start(Symbol.for('normal'), [])

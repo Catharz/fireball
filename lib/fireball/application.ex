@@ -11,7 +11,7 @@ defmodule Fireball.Application do
       # Start the Ecto repository
       supervisor(Fireball.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(FireballWeb.Endpoint, []),
+      supervisor(FireballWeb.Endpoint, [])
       # Start your own worker by calling: Fireball.Worker.start_link(arg1, arg2, arg3)
       # worker(Fireball.Worker, [arg1, arg2, arg3]),
     ]
