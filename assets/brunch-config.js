@@ -57,6 +57,7 @@ exports.config = {
   },
 
   npm: {
-    enabled: true
+      enabled: true,
+      "static": ['node_modules/phaser/dist/phaser.js']
   }
 };
