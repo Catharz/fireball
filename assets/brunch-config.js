@@ -52,12 +52,11 @@ exports.config = {
 
   modules: {
     autoRequire: {
-      "js/app.js": ["js/app"]
+        "js/app.js": ["js/app", "js/fireball"]
     }
   },
 
   npm: {
-      enabled: true,
-      "static": ['node_modules/phaser/dist/phaser.js']
+      enabled: true
   }
 };

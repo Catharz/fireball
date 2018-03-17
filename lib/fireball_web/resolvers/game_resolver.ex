@@ -4,6 +4,6 @@ defmodule FireballWeb.Resolvers.GameResolver do
     now = Timex.now()
     {:ok, start_time} = Timex.format(now, "{ISO:Extended}")
 
-    {:ok, [ %Game{start_time: start_time, players: []} ]}
+    {:ok, [%Game{start_time: start_time, players: []}]}
   end
 end
