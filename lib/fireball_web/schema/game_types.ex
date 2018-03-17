@@ -10,7 +10,7 @@ defmodule FireballWeb.Schema.GameTypes do
     field :start_time, non_null(:iso_extended)
 
     @desc "The time a game ended."
-    field :end_time, non_null(:iso_extended)
+    field :end_time, :iso_extended
 
     @desc "The list of players in this game."
     field :players, non_null(list_of(:string))
@@ -21,12 +21,12 @@ defmodule FireballWeb.Schema.GameTypes do
 
   @desc "Game related queries"
   object :game_queries do
-    @desc "The game score for a particular game."
-    field :score, non_null(list_of(:string)) do
+    @desc "The details for a particular game."
+    field :game, non_null(list_of(:game)) do
       @desc "The id of the game."
-      arg :game_id, non_null(:id)
+      arg :id, non_null(:id)
 
-      resolve &FireballWeb.Resolvers.GameResolver.score/2
+      resolve &FireballWeb.Resolvers.GameResolver.game/2
     end
   end
 end

@@ -12,7 +12,6 @@
 // If you no longer want to use a dependency, remember
 // to also remove its path from "config.paths.watched".
 import "phoenix_html"
-import "babel-polyfill"
 
 // Import local files
 //
@@ -20,7 +19,3 @@ import "babel-polyfill"
 // paths "./socket" or full ones "web/static/js/socket".
 
 // import socket from "./socket"
-import Fireball from './build/Elixir.Fireball.js'
-
-console.log(Fireball)
-Fireball.start(Symbol.for('normal'), [])

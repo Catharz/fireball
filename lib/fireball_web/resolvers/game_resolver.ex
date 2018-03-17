@@ -1,6 +1,9 @@
 defmodule FireballWeb.Resolvers.GameResolver do
-  @spec score(%Game{}, Absinthe.Resolution.t()) :: {atom, []}
-  def score(_args, _info) do
-    {:ok, []}
+  @spec game(%Game{}, Absinthe.Resolution.t()) :: {atom, []}
+  def game(_args, _info) do
+    now = Timex.now()
+    {:ok, start_time} = Timex.format(now, "{ISO:Extended}")
+
+    {:ok, %Game{start_time: start_time, players: []}}
   end
 end

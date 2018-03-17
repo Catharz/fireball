@@ -7,14 +7,10 @@ defmodule Fireball.Mixfile do
       version: "0.0.1",
       elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers() ++ [:elixir_script],
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      elixir_script: [
-        input: Fireball,
-        output: "assets/js/build"
-      ]
+      deps: deps()
     ]
   end
 
@@ -48,9 +44,7 @@ defmodule Fireball.Mixfile do
       {:absinthe, "~> 1.4.6"},
       {:absinthe_plug, "~> 1.4.2"},
       {:absinthe_phoenix, "~> 1.4.2"},
-      {:timex, "~> 3.2.1"},
-      {:elixir_script, "~> 0.32"}
-    ]
+      {:timex, "~> 3.2.1"}    ]
   end
 
   # Aliases are shortcuts or tasks specific to the current project.
