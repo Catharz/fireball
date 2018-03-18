@@ -18,15 +18,15 @@
          "name":"game_objects",
          "objects":[
                 {
-                 "height":31.25,
+                 "height":32,
                  "id":6,
-                 "name":"spawn",
+                 "name":"spawn_01",
                  "rotation":0,
-                 "type":"",
+                 "type":"spawn_point",
                  "visible":true,
-                 "width":31.25,
-                 "x":96.8125,
-                 "y":64.6875
+                 "width":32,
+                 "x":96,
+                 "y":64
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -34,7 +34,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":7,
+ "nextobjectid":8,
  "orientation":"isometric",
  "renderorder":"right-down",
  "tiledversion":"1.1.3",
