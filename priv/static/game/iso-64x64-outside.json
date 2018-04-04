@@ -1,0 +1,12 @@
+{ "columns":10,
+ "image":"iso-64x64-outside.png",
+ "imageheight":1024,
+ "imagewidth":640,
+ "margin":0,
+ "name":"iso-64x64-outside",
+ "spacing":0,
+ "tilecount":320,
+ "tileheight":32,
+ "tilewidth":64,
+ "type":"tileset"
+}

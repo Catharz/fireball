@@ -1,0 +1,12 @@
+{ "columns":10,
+ "image":"iso-64x64-building.png",
+ "imageheight":512,
+ "imagewidth":640,
+ "margin":0,
+ "name":"iso-64x64-building",
+ "spacing":0,
+ "tilecount":160,
+ "tileheight":32,
+ "tilewidth":64,
+ "type":"tileset"
+}
