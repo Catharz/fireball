@@ -29,6 +29,7 @@ var g_resources = [
     {
         name: "level_1",
         type: "tmx",
+        // src: "/random_level.json"
         src: "/game/level_1.json"
     }
 ];
@@ -39,29 +40,28 @@ var game = {
      * initlization
      */
     onload: function() {
-
-        // init the video
-        // if (!me.video.init((window.innerWidth / 3), (window.innerHeight / 3) - 12, {
-        //         wrapper: "jsapp",
-        //         // renderer: me.video.WEBGL, // For some reason this breaks the scaling
-        //         antiAlias: true,
-        //         doubleBuffering: true,
-        //         scale: me.device.getPixelRatio() * 3
-        //     })) {
-        //     alert("Your browser does not support HTML5 canvas.");
-        //     return;
-        // }
-
-        if (!me.video.init(window.innerWidth / 2, window.innerHeight / 2 - 12, {
+        var webGLOpts = {
             wrapper: "jsapp",
-            renderer: me.video.WEBGL, // For some reason this breaks the scaling
+            renderer: me.video.WEBGL,
             antiAlias: true,
             doubleBuffering: true,
             scale: "auto",
             scaleMethod: "fit"
-        })) {
-            alert("Your browser does not support HTML5 canvas.");
-            return;
+        };
+
+        var canvasOpts = {
+            wrapper: "jsapp",
+            antiAlias: true,
+            doubleBuffering: true,
+            scale: me.device.getPixelRatio() * 3
+        };
+
+        // init the video
+        if (!me.video.init(window.innerWidth / 2, window.innerHeight / 2 - 12, webGLOpts)) {
+            if (!me.video.init((window.innerWidth / 3), (window.innerHeight / 3) - 12, canvasOpts)) {
+                alert("Your browser does not support HTML5 canvas.");
+                return;
+            }
         }
 
         // setup the player
@@ -158,13 +158,15 @@ game.PlayerEntity = me.Entity.extend({
             me.loader.getImage("player")
         );
 
-        // create a new sprite object
-        this.renderable = texture.createAnimationFromName([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        // create a new sprite object with the images used for each animation
+        this.renderable = texture.createAnimationFromName([
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
             24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
             36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47
         ]);
-        // define an additional basic walking animation
+
+        // define a walking animation for each direction
         this.renderable.addAnimation("walk_south", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
         this.renderable.addAnimation("walk_west", [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]);
         this.renderable.addAnimation("walk_east", [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]);
@@ -182,23 +184,20 @@ game.PlayerEntity = me.Entity.extend({
      * update the entity
      */
     update: function(dt) {
+        // update the entity velocity and set the animation for the movement direction
         if (me.input.isKeyPressed("left")) {
-            // update the entity velocity
             this.body.vel.x -= this.body.accel.x * me.timer.tick;
             this.animation = "walk_west";
         } else if (me.input.isKeyPressed("right")) {
-            // update the entity velocity
             this.body.vel.x += this.body.accel.x * me.timer.tick;
             this.animation = "walk_east";
         } else {
             this.body.vel.x = 0;
         }
         if (me.input.isKeyPressed("up")) {
-            // update the entity velocity
             this.body.vel.y -= this.body.accel.y * me.timer.tick;
             this.animation = "walk_north";
         } else if (me.input.isKeyPressed("down")) {
-            // update the entity velocity
             this.body.vel.y += this.body.accel.y * me.timer.tick;
             this.animation = "walk_south";
         } else {
@@ -220,6 +219,7 @@ game.PlayerEntity = me.Entity.extend({
             this._super(me.Entity, "update", [dt]);
             return true;
         }
+        return false;
     },
 
     /**
