@@ -23,14 +23,17 @@ defmodule FireballWeb.Schema.LevelTypes do
 
   union :layer do
     types [:tile_layer, :object_layer]
+
     resolve_type fn
       %TileLayer{}, _ ->
         :tile_layer
+
       %ObjectLayer{}, _ ->
         :object_layer
+
       _, _ ->
         nil
-     end
+    end
   end
 
   object :tile_layer do
@@ -82,5 +85,4 @@ defmodule FireballWeb.Schema.LevelTypes do
       resolve &Resolver.generate_level/2
     end
   end
-
 end

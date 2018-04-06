@@ -32,8 +32,9 @@ defmodule FireballWeb.Resolvers.LevelResolver do
 
   def tile_layer("layer1", args) do
     grass = 11
+
     %TileLayer{
-      data: Enum.map(  1..args.width * args.height, fn _ -> grass end ),
+      data: Enum.map(1..(args.width * args.height), fn _ -> grass end),
       height: args.height,
       name: "layer1",
       opacity: 1,
@@ -48,8 +49,9 @@ defmodule FireballWeb.Resolvers.LevelResolver do
   def tile_layer("layer2", args) do
     empty = 0
     _wall_base = 331
+
     %TileLayer{
-      data: Enum.map(  1..args.width * args.height, fn _ -> empty end ),
+      data: Enum.map(1..(args.width * args.height), fn _ -> empty end),
       height: args.height,
       name: "layer2",
       opacity: 1,
@@ -59,13 +61,14 @@ defmodule FireballWeb.Resolvers.LevelResolver do
       x: 0,
       y: 0
     }
- end
+  end
 
   def tile_layer("layer3", args) do
     empty = 0
     _wall_base = 331
+
     %TileLayer{
-      data: Enum.map(  1..args.width * args.height, fn _ -> empty end ),
+      data: Enum.map(1..(args.width * args.height), fn _ -> empty end),
       height: args.height,
       name: "layer3",
       opacity: 1,
@@ -77,7 +80,7 @@ defmodule FireballWeb.Resolvers.LevelResolver do
     }
   end
 
- def collision_layer do
+  def collision_layer do
     %ObjectLayer{
       color: "#ff0000",
       draworder: "topdown",
