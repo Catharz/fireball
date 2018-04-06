@@ -104,8 +104,8 @@ defmodule FireballWeb.Resolvers.LevelResolver do
           type: "actor1m",
           visible: true,
           width: 32,
-          x: 132.0,
-          y: 132.0
+          x: 64.0,
+          y: 64.0
         }
       ],
       opacity: 1,

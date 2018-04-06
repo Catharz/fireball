@@ -29,10 +29,88 @@ var g_resources = [
     {
         name: "level_1",
         type: "tmx",
-        // src: "/random_level.json"
         src: "/game/level_1.json"
     }
 ];
+
+var height = 10;
+var width = 10;
+var query = `
+query GenerateLevel($height: Int!, $width: Int!){
+  generateLevel(height: $height, width: $width) {
+    height
+    width
+    tileheight
+    tilewidth
+    layers {
+      ... on TileLayer {
+        data
+        height
+        width
+        name
+        opacity
+        type
+        visible
+        x
+        y
+      }
+      ... on ObjectLayer {
+        draworder
+        name
+        objects {
+          height
+          id
+          name
+          rotation
+          type
+          visible
+          width
+          x
+          y
+        }
+        opacity
+        type
+        visible
+        x
+        y
+      }
+    }
+    tilesets {
+      firstgid
+      source
+    }
+    nextobjectid
+    orientation
+    renderorder
+    tiledversion
+    type
+    version
+  }
+}
+`;
+
+// download level data
+var xhr = new XMLHttpRequest();
+xhr.responseType = 'json';
+xhr.open("POST", "/graphql", true);
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Accept", "application/json");
+xhr.onload = function() {
+    me.loader.load({
+        name: "level_2",
+        type: "tmx",
+        format: "json",
+        data: xhr.response.data.generateLevel
+    });
+    return;
+};
+xhr.send(JSON.stringify({
+    query: query,
+    variables: {
+        height: height,
+        width: width
+    }
+}));
 
 var game = {
 
@@ -88,35 +166,7 @@ var game = {
 
         // switch to PLAY state
         me.state.change(me.state.PLAY);
-    },
-
-
-
-    /**
-     *
-     * change the current level
-     * using the listbox current value in the HTML file
-     */
-    changelevel: function() {
-
-        var level = "level_1";
-        // var level_id = document.getElementById("level_name").value;
-
-        // switch (level_id) {
-        // case "1":
-        //     level = "level_1";
-        //     break;
-        // case "2":
-        //     level = "level_2";
-        //     break;
-        // default:
-        //     return;
-        // };
-
-        // load the new level
-        me.levelDirector.loadLevel(level);
     }
-
 }; // game
 
 game.PlayerEntity = me.Entity.extend({
@@ -238,7 +288,7 @@ game.PlayScreen = me.ScreenObject.extend({
      */
     onResetEvent: function() {
         // load a level
-        me.levelDirector.loadLevel("level_1");
+        me.levelDirector.loadLevel("level_2");
 
         // display a basic tile selector
         me.game.world.addChild(new(me.Renderable.extend({
