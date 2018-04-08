@@ -1,6 +1,11 @@
 defmodule RecursiveBacktrack do
   require Bitwise
 
+  @moduledoc """
+  This code has been borrowed from here:
+  https://github.com/craigp/mazes/blob/master/lib/recursive_backtrack.ex
+  """
+
   @spec run(Integer, Integer, Boolean) :: List
   def run(display \\ false, width \\ 10, height \\ 10) do
     # clear the screen
