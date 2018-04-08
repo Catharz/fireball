@@ -5,8 +5,8 @@ defmodule FireballWeb.Resolvers.LevelResolver do
      %Level{
        backgroundcolor: "#00007c",
        infinite: false,
-       height: args.height,
-       width: args.width,
+       height: args.height * 3,
+       width: args.width * 3,
        nextobjectid: 1,
        layers: layers_for(args),
        orientation: "isometric",
@@ -21,7 +21,7 @@ defmodule FireballWeb.Resolvers.LevelResolver do
   end
 
   # This is where we generate the maze for the level.
-  defp generate_maze(args) do
+  def generate_maze(args) do
     RecursiveBacktrack.run(false, args.width, args.height)
     |> MazeTransformer.transform()
   end
@@ -40,15 +40,18 @@ defmodule FireballWeb.Resolvers.LevelResolver do
   # Layer 1 is where all of the grass will be shown.
   defp tile_layer("layer1", args) do
     grass = 11
+    width = args.width * 3
+    height = args.height * 3
+    data = Enum.map(1..(width * height), fn _ -> grass end)
 
     %TileLayer{
-      data: Enum.map(1..(args.width * args.height), fn _ -> grass end),
-      height: args.height,
+      data: data,
+      height: height,
       name: "layer1",
       opacity: 1,
       type: "tilelayer",
       visible: true,
-      width: args.width,
+      width: width,
       x: 0,
       y: 0
     }
@@ -58,17 +61,18 @@ defmodule FireballWeb.Resolvers.LevelResolver do
   # e.g. A wall object with collisions will its base on layer 2
   # and its top on layer 3.
   defp tile_layer("layer2", args) do
-    empty = 0
-    _wall_base = 331
+    width = args.width * 3
+    height = args.height * 3
+    data = generate_maze(args)
 
     %TileLayer{
-      data: Enum.map(1..(args.width * args.height), fn _ -> empty end),
-      height: args.height,
+      data: data,
+      height: height,
       name: "layer2",
       opacity: 1,
       type: "tilelayer",
       visible: true,
-      width: args.width,
+      width: width,
       x: 0,
       y: 0
     }
@@ -82,15 +86,18 @@ defmodule FireballWeb.Resolvers.LevelResolver do
   defp tile_layer("layer3", args) do
     empty = 0
     _wall_base = 331
+    width = args.width * 3
+    height = args.height * 3
+    data = Enum.map(1..(width * height), fn _ -> empty end)
 
     %TileLayer{
-      data: Enum.map(1..(args.width * args.height), fn _ -> empty end),
-      height: args.height,
+      data: data,
+      height: height,
       name: "layer3",
       opacity: 1,
       type: "tilelayer",
       visible: true,
-      width: args.width,
+      width: width,
       x: 0,
       y: 0
     }
@@ -126,15 +133,15 @@ defmodule FireballWeb.Resolvers.LevelResolver do
           type: "actor1m",
           visible: true,
           width: 32,
-          x: 64.0,
-          y: 64.0
+          x: 32.0,
+          y: 32.0
         }
       ],
       opacity: 1,
       type: "objectgroup",
       visible: true,
-      x: 0,
-      y: 0
+      x: 1,
+      y: 1
     }
   end
 

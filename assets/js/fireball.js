@@ -33,8 +33,8 @@ var g_resources = [
     }
 ];
 
-var height = 12;
-var width = 12;
+var height = 10;
+var width = 10;
 var query = `
 query GenerateLevel($height: Int!, $width: Int!){
   generateLevel(height: $height, width: $width) {
@@ -135,7 +135,7 @@ var game = {
         };
 
         // init the video
-        if (!me.video.init(window.innerWidth / 2, window.innerHeight / 2 - 12, webGLOpts)) {
+        if (!me.video.init(window.innerWidth / 2, window.innerHeight / 2, webGLOpts)) {
             if (!me.video.init((window.innerWidth / 3), (window.innerHeight / 3) - 12, canvasOpts)) {
                 alert("Your browser does not support HTML5 canvas.");
                 return;
