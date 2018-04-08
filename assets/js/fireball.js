@@ -33,8 +33,8 @@ var g_resources = [
     }
 ];
 
-var height = 10;
-var width = 10;
+var height = 12;
+var width = 12;
 var query = `
 query GenerateLevel($height: Int!, $width: Int!){
   generateLevel(height: $height, width: $width) {
