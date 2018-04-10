@@ -1,7 +1,8 @@
 defmodule FireballWeb.Resolvers.LevelResolver do
   @spec generate_maze(%Level{}, Absinthe.Resolution.t()) :: {atom, %Level{}}
   def generate_maze(args, _info) do
-    room_width = 2
+    room_width = args.hall_width + 1
+
     {:ok,
      %Level{
        backgroundcolor: "#00007c",
@@ -18,7 +19,8 @@ defmodule FireballWeb.Resolvers.LevelResolver do
        tilesets: tilesets(),
        type: "map",
        version: 1
-     }}
+     }
+    }
   end
 
   def gen_layers(args) do
@@ -26,18 +28,16 @@ defmodule FireballWeb.Resolvers.LevelResolver do
 
     ["layer1", "layer2", "player", "layer3", "collision"]
     |> Enum.map(fn layer ->
-      gen_layer(layer, maze)
+      gen_layer(layer, maze, args)
     end)
   end
 
-  def gen_layer(layer, maze) when layer in ["layer1", "layer2", "layer3"] do
-    data = MazeTransformer.layer(layer, maze)
+  def gen_layer(layer, maze, args) when layer in ["layer1", "layer2", "layer3"] do
+    data = MazeTransformer.layer(layer, maze, args)
 
-    base_height = maze |> Enum.count()
-    base_width = maze |> List.first() |> Enum.count()
-
-    height = (base_height * 2) + 2
-    width = (base_width * 2) + 2
+    room_width = args.hall_width + 1
+    height = (args.height * room_width) + 2
+    width = (args.width * room_width) + 2
 
     %TileLayer{
       data: data,
@@ -52,9 +52,9 @@ defmodule FireballWeb.Resolvers.LevelResolver do
     }
   end
 
-  def gen_layer(layer, maze) do
+  def gen_layer(layer, maze, args) do
     layer
-    |> MazeTransformer.layer(maze)
+    |> MazeTransformer.layer(maze, args)
   end
 
   # These are the tilesets used to generate the graphics.

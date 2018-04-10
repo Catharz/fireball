@@ -35,9 +35,10 @@ var g_resources = [
 
 var height = 10;
 var width = 10;
+var hall_width = 2;
 var query = `
-query GenerateLevel($height: Int!, $width: Int!){
-  generateLevel(height: $height, width: $width) {
+query GenerateLevel($height: Int!, $width: Int!, $hallWidth: Int){
+  generateLevel(height: $height, width: $width, hallWidth: $hallWidth) {
     height
     width
     tileheight
@@ -108,7 +109,8 @@ xhr.send(JSON.stringify({
     query: query,
     variables: {
         height: height,
-        width: width
+        width: width,
+        hallWidth: hall_width
     }
 }));
 

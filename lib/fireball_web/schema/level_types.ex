@@ -81,6 +81,7 @@ defmodule FireballWeb.Schema.LevelTypes do
     field :generate_level, non_null(:level) do
       arg :width, non_null(:integer)
       arg :height, non_null(:integer)
+      arg :hall_width, :integer, default_value: 1
 
       resolve &Resolver.generate_maze/2
     end
