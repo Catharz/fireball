@@ -35,88 +35,159 @@ defmodule MazeTransformer do
 
   As such, a 5x5 maze will become 15x15 tiles.
   """
+  # Grass layer
+  def layer("layer1", maze) do
+    {space, grass} = {0, 11}
+    base_height = maze |> Enum.count()
+    base_width = maze |> List.first() |> Enum.count()
+    room_width = 2
 
-  @doc """
-  Transform takes the maze in the above format and totally flattens it out.
-  """
-  def transform(maze) do
-    space = 0
-    wall = 331
+    grid_width = (base_width * room_width) + 2
+    grid_height = (base_height * room_width) + 2
 
-    maze
-    |> Enum.map(fn row ->
-      ["t", "m", "b"]
-      |> Enum.map(fn type ->
-        tile_row(row, type, space, wall)
-      end)
-    end)
+    [
+      repeat(grid_width, space),
+      1..(grid_height - 2)
+      |> Enum.map(fn _ ->
+        [space] ++ repeat(grid_width - 2, grass) ++ [space]
+      end),
+      repeat(grid_width, space),
+    ]
     |> List.flatten()
   end
 
-  defp tile_row(row, type, space, wall) do
+  # Wall bases
+  def layer("layer2", maze) do
+    {space, wall} = {0, 331}
+
+    base_width = maze |> List.first() |> Enum.count()
+    room_width = 2
+    grid_width = (base_width * room_width) + 2
+
+    [
+      repeat(grid_width, space),
+      maze
+      |> Enum.map(fn row ->
+        ["top", "mid"]
+        |> Enum.map(fn type ->
+          [space] ++ transform_row(row, type, space, wall) ++ [wall]
+        end)
+      end),
+      [space] ++ repeat(grid_width - 1, wall)
+    ]
+    |> List.flatten()
+  end
+
+  # Wall tops
+  def layer("layer3", maze) do
+    {space, wall} = {0, 321}
+
+    base_width = maze |> List.first() |> Enum.count()
+    room_width = 2
+    grid_width = (base_width * room_width) + 2
+
+    [
+      maze
+      |> Enum.map(fn row ->
+        ["top", "mid"]
+        |> Enum.map(fn type ->
+          transform_row(row, type, space, wall) ++ [wall, space]
+        end)
+      end),
+      repeat(grid_width - 1, wall) ++ [space],
+      repeat(grid_width, space)
+    ]
+    |> List.flatten()
+  end
+
+  def layer("player", _maze) do
+    %ObjectLayer{
+      draworder: "topdown",
+      name: "Player",
+      objects: [
+        %Object{
+          height: 32,
+          id: 14,
+          name: "mainPlayer",
+          rotation: 0,
+          type: "actor1m",
+          visible: true,
+          width: 32,
+          x: 48.0,
+          y: 48.0
+        }
+      ],
+      opacity: 1,
+      type: "objectgroup",
+      visible: true,
+      x: 0,
+      y: 0
+    }
+  end
+
+  def layer("collision", _maze) do
+    %ObjectLayer{
+      color: "#ff0000",
+      draworder: "topdown",
+      name: "collision",
+      objects: [],
+      opacity: 1,
+      type: "objectgroup",
+      visible: true,
+      x: 0,
+      y: 0
+    }
+  end
+
+  def repeat(width, tile) do
+    1..width
+    |> Enum.map(fn _ -> tile end)
+  end
+
+  def transform_row(row, type, space, wall) do
     row
     |> Enum.map(fn room ->
       room
-      |> to_walls(type, space, wall)
+      |> transform_wall(type, space, wall)
     end)
   end
 
-  defp to_walls(1, "t", s, w), do: [w, s, w]
-  defp to_walls(1, "m", s, w), do: [w, s, w]
-  defp to_walls(1, "b", _, w), do: [w, w, w]
+  # The wall mappings are:
+  #    1    2    3    4    5
+  #   # #  ###  # #  ###  #
+  #   # #  # #  # #  #    #
+  #   ###  # #  # #  ###  ###
+  #
+  #    6    7    8    9   10
+  #   ###  #    ###    #  ###
+  #   #    #      #    #    #
+  #   #    #    ###  ###    #
+  #
+  #   11   12   13   14   15
+  #     #  ###       ###
+  #     #
+  #     #  ###  ###
 
-  defp to_walls(2, "t", _, w), do: [w, w, w]
-  defp to_walls(2, "m", s, w), do: [w, s, w]
-  defp to_walls(2, "b", s, w), do: [w, s, w]
-
-  defp to_walls(3, "t", s, w), do: [w, s, w]
-  defp to_walls(3, "m", s, w), do: [w, s, w]
-  defp to_walls(3, "b", s, w), do: [w, s, w]
-
-  defp to_walls(4, "t", _, w), do: [w, w, w]
-  defp to_walls(4, "m", s, w), do: [w, s, s]
-  defp to_walls(4, "b", _, w), do: [w, w, w]
-
-  defp to_walls(5, "t", s, w), do: [w, s, s]
-  defp to_walls(5, "m", s, w), do: [w, s, s]
-  defp to_walls(5, "b", _, w), do: [w, w, w]
-
-  defp to_walls(6, "t", _, w), do: [w, w, w]
-  defp to_walls(6, "m", s, w), do: [w, s, s]
-  defp to_walls(6, "b", s, w), do: [w, s, s]
-
-  defp to_walls(7, "t", s, w), do: [w, s, s]
-  defp to_walls(7, "m", s, w), do: [w, s, s]
-  defp to_walls(7, "b", s, w), do: [w, s, s]
-
-  defp to_walls(8, "t", _, w), do: [w, w, w]
-  defp to_walls(8, "m", s, w), do: [s, s, w]
-  defp to_walls(8, "b", s, w), do: [s, s, w]
-
-  defp to_walls(9, "t", s, w), do: [s, s, w]
-  defp to_walls(9, "m", s, w), do: [s, s, w]
-  defp to_walls(9, "b", _, w), do: [w, w, w]
-
-  defp to_walls(10, "t", _, w), do: [w, w, w]
-  defp to_walls(10, "m", s, w), do: [s, s, w]
-  defp to_walls(10, "b", s, w), do: [s, s, w]
-
-  defp to_walls(11, "t", s, w), do: [s, s, w]
-  defp to_walls(11, "m", s, w), do: [s, s, w]
-  defp to_walls(11, "b", s, w), do: [s, s, w]
-
-  defp to_walls(12, "t", _, w), do: [w, w, w]
-  defp to_walls(12, "m", s, _), do: [s, s, s]
-  defp to_walls(12, "b", _, w), do: [w, w, w]
-
-  defp to_walls(13, "t", s, _), do: [s, s, s]
-  defp to_walls(13, "m", s, _), do: [s, s, s]
-  defp to_walls(13, "b", _, w), do: [w, w, w]
-
-  defp to_walls(14, "t", _, w), do: [w, w, w]
-  defp to_walls(14, "m", s, _), do: [s, s, s]
-  defp to_walls(14, "b", s, _), do: [s, s, s]
-
-  # 15 has empty walls all around it
-  defp to_walls(_, _, s, _w), do: [s, s, s]
+  def transform_wall(1, _, s, w), do: [w, s]
+  def transform_wall(2, "top", _, w), do: [w, w]
+  def transform_wall(2, _, s, w), do: [w, s]
+  def transform_wall(3, _, s, w), do: [w, s]
+  def transform_wall(4, "top", _, w), do: [w, w]
+  def transform_wall(4, _, s, w), do: [w, s]
+  def transform_wall(5, _, s, w), do: [w, s]
+  def transform_wall(6, "top", _, w), do: [w, w]
+  def transform_wall(6, _, s, w), do: [w, s]
+  def transform_wall(7, _, s, w), do: [w, s]
+  def transform_wall(8, "top", _, w), do: [w, w]
+  def transform_wall(8, _, s, _), do: [s, s]
+  def transform_wall(9, _, s, _), do: [s, s]
+  def transform_wall(10, "top", _, w), do: [w, w]
+  def transform_wall(10, _, s, _), do: [s, s]
+  def transform_wall(11, _, s, _), do: [s, s]
+  def transform_wall(12, "top", _, w), do: [w, w]
+  def transform_wall(12, _, s, _), do: [s, s]
+  def transform_wall(13, _, s, _), do: [s, s]
+  def transform_wall(14, "top", _, w), do: [w, w]
+  def transform_wall(14, _, s, _), do: [s, s]
+  def transform_wall(_, _, s, _w), do: [s, s]
 end

@@ -1,32 +1,43 @@
-{ "height":6,
+{ "height":10,
  "infinite":false,
  "layers":[
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":6,
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 11, 11, 11, 11, 11, 11, 11, 11, 11],
+         "height":10,
          "name":"layer1",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
-         "width":6,
+         "width":10,
          "x":0,
          "y":0
         }, 
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":6,
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 331, 331, 331, 331, 331, 331, 331, 331, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 331, 331, 331, 331, 331, 331, 331, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 0, 0, 0, 331, 0, 0, 0, 331, 0, 331, 331, 331, 331, 331, 331, 331, 331, 331],
+         "height":10,
          "name":"layer2",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
-         "width":6,
+         "width":10,
          "x":0,
          "y":0
         }, 
         {
          "draworder":"topdown",
          "name":"Player",
-         "objects":[],
+         "objects":[
+                {
+                 "height":32,
+                 "id":1,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":64,
+                 "y":64
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -34,34 +45,98 @@
          "y":0
         }, 
         {
-         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-         "height":6,
+         "data":[321, 321, 321, 321, 321, 321, 321, 321, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 321, 321, 321, 321, 321, 321, 321, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 0, 0, 0, 321, 0, 0, 0, 321, 0, 321, 321, 321, 321, 321, 321, 321, 321, 321, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":10,
          "name":"layer3",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
-         "width":6,
+         "width":10,
          "x":0,
          "y":0
         }, 
         {
+         "color":"#ff0000",
          "draworder":"topdown",
          "name":"collision",
-         "objects":[],
+         "objects":[
+                {
+                 "height":320,
+                 "id":5,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":32,
+                 "y":0
+                }, 
+                {
+                 "height":32,
+                 "id":6,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":320,
+                 "x":0,
+                 "y":32
+                }, 
+                {
+                 "height":32,
+                 "id":7,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":320,
+                 "x":0,
+                 "y":288
+                }, 
+                {
+                 "height":320,
+                 "id":8,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":288,
+                 "y":0
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":671,
+                 "y":483
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
         }],
- "nextobjectid":1,
+ "nextobjectid":10,
  "orientation":"isometric",
  "renderorder":"right-down",
  "tiledversion":"1.1.3",
  "tileheight":32,
- "tilesets":[],
+ "tilesets":[
+        {
+         "firstgid":1,
+         "source":"iso-64x64-outside.json"
+        }, 
+        {
+         "firstgid":321,
+         "source":"iso-64x64-building.json"
+        }],
  "tilewidth":64,
  "type":"map",
  "version":1,
- "width":6
+ "width":10
 }

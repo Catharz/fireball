@@ -1,14 +1,15 @@
 defmodule FireballWeb.Resolvers.LevelResolver do
-  @spec generate_level(%Level{}, Absinthe.Resolution.t()) :: {atom, %Level{}}
-  def generate_level(args, _info) do
+  @spec generate_maze(%Level{}, Absinthe.Resolution.t()) :: {atom, %Level{}}
+  def generate_maze(args, _info) do
+    room_width = 2
     {:ok,
      %Level{
        backgroundcolor: "#00007c",
        infinite: false,
-       height: args.height * 3,
-       width: args.width * 3,
+       height: (args.height * room_width) + 2,
+       width: (args.width * room_width) + 2,
        nextobjectid: 1,
-       layers: layers_for(args),
+       layers: gen_layers(args),
        orientation: "isometric",
        renderorder: "right-down",
        tiledversion: "1.1.3",
@@ -20,34 +21,28 @@ defmodule FireballWeb.Resolvers.LevelResolver do
      }}
   end
 
-  # This is where we generate the maze for the level.
-  def generate_maze(args) do
-    RecursiveBacktrack.run(false, args.width, args.height)
-    |> MazeTransformer.transform()
+  def gen_layers(args) do
+    maze = RecursiveBacktrack.run(false, args.width, args.height)
+
+    ["layer1", "layer2", "player", "layer3", "collision"]
+    |> Enum.map(fn layer ->
+      gen_layer(layer, maze)
+    end)
   end
 
-  # These are the 5 layers used to recreate the game.
-  defp layers_for(args) do
-    [
-      tile_layer("layer1", args),
-      tile_layer("layer2", args),
-      player_layer(),
-      tile_layer("layer3", args),
-      collision_layer()
-    ]
-  end
+  def gen_layer(layer, maze) when layer in ["layer1", "layer2", "layer3"] do
+    data = MazeTransformer.layer(layer, maze)
 
-  # Layer 1 is where all of the grass will be shown.
-  defp tile_layer("layer1", args) do
-    grass = 11
-    width = args.width * 3
-    height = args.height * 3
-    data = Enum.map(1..(width * height), fn _ -> grass end)
+    base_height = maze |> Enum.count()
+    base_width = maze |> List.first() |> Enum.count()
+
+    height = (base_height * 2) + 2
+    width = (base_width * 2) + 2
 
     %TileLayer{
       data: data,
       height: height,
-      name: "layer1",
+      name: layer,
       opacity: 1,
       type: "tilelayer",
       visible: true,
@@ -57,92 +52,9 @@ defmodule FireballWeb.Resolvers.LevelResolver do
     }
   end
 
-  # Layer 2 is where all of the bases of objects are shown.
-  # e.g. A wall object with collisions will its base on layer 2
-  # and its top on layer 3.
-  defp tile_layer("layer2", args) do
-    width = args.width * 3
-    height = args.height * 3
-    data = generate_maze(args)
-
-    %TileLayer{
-      data: data,
-      height: height,
-      name: "layer2",
-      opacity: 1,
-      type: "tilelayer",
-      visible: true,
-      width: width,
-      x: 0,
-      y: 0
-    }
-  end
-
-  # Layer 3 is for the "tops" of items that the player can move
-  # behind. e.g. A wall will have the bottom of it on layer 2, which
-  # will have a collision defined. But the player can move behind the
-  # top of the all giving a sense of depth. The tops of the walls go
-  # here.
-  defp tile_layer("layer3", args) do
-    empty = 0
-    _wall_base = 331
-    width = args.width * 3
-    height = args.height * 3
-    data = Enum.map(1..(width * height), fn _ -> empty end)
-
-    %TileLayer{
-      data: data,
-      height: height,
-      name: "layer3",
-      opacity: 1,
-      type: "tilelayer",
-      visible: true,
-      width: width,
-      x: 0,
-      y: 0
-    }
-  end
-
-  # This is where the collisions are defined. They need to use the same data
-  # as layer 2, but transform it into objects of the same size.
-  defp collision_layer do
-    %ObjectLayer{
-      color: "#ff0000",
-      draworder: "topdown",
-      name: "collision",
-      objects: [],
-      opacity: 1,
-      type: "objectgroup",
-      visible: true,
-      x: 0,
-      y: 0
-    }
-  end
-
-  # This is where the player will start the game.
-  defp player_layer do
-    %ObjectLayer{
-      draworder: "topdown",
-      name: "Player",
-      objects: [
-        %Object{
-          height: 32,
-          id: 14,
-          name: "mainPlayer",
-          rotation: 0,
-          type: "actor1m",
-          visible: true,
-          width: 32,
-          x: 32.0,
-          y: 32.0
-        }
-      ],
-      opacity: 1,
-      type: "objectgroup",
-      visible: true,
-      x: 1,
-      y: 1
-    }
+  def gen_layer(layer, maze) do
+    layer
+    |> MazeTransformer.layer(maze)
   end
 
   # These are the tilesets used to generate the graphics.
