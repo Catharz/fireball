@@ -6,7 +6,7 @@
 use Mix.Config
 
 # General application configuration
-config :fireball, ecto_repos: [Fireball.Repo]
+config :fireball, ecto_repos: []
 
 # Configures the endpoint
 config :fireball, FireballWeb.Endpoint,
