@@ -25,6 +25,7 @@ defmodule FireballWeb.Resolvers.LevelResolver do
 
   def gen_layers(args) do
     maze = RecursiveBacktrack.run(false, args.width, args.height)
+    IO.inspect maze
 
     ["layer1", "layer2", "player", "layer3", "collision"]
     |> Enum.map(fn layer ->

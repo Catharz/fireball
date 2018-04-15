@@ -64,10 +64,17 @@ defmodule FireballWeb.Schema.LevelTypes do
     field :height, non_null(:integer)
     field :id, non_null(:integer)
     field :name, non_null(:string)
+    field :polygon, list_of(:coordinate)
+    field :polyline, list_of(:coordinate)
     field :rotation, non_null(:integer)
     field :type, non_null(:string)
     field :visible, non_null(:boolean)
     field :width, non_null(:integer)
+    field :x, non_null(:integer)
+    field :y, non_null(:integer)
+  end
+
+  object :coordinate do
     field :x, non_null(:integer)
     field :y, non_null(:integer)
   end

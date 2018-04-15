@@ -1,0 +1,62 @@
+GET http://127.0.0.1:4444/graphql
+Content-type: application/json
+
+{
+  generateLevel(height: 10, width: 10, hallWidth: 2) {
+    height
+    width
+    tileheight
+    tilewidth
+    layers {
+      ... on TileLayer {
+        data
+        height
+        width
+        name
+        opacity
+        type
+        visible
+        x
+        y
+      }
+      ... on ObjectLayer {
+        draworder
+        name
+        objects {
+          height
+          id
+          name
+          polygon {
+            x
+            y
+          }
+          polyline {
+            x
+            y
+          }
+          rotation
+          type
+          visible
+          width
+          x
+          y
+        }
+        opacity
+        type
+        visible
+        x
+        y
+      }
+    }
+    tilesets {
+      firstgid
+      source
+    }
+    nextobjectid
+    orientation
+    renderorder
+    tiledversion
+    type
+    version
+  }
+}

@@ -9,63 +9,77 @@ defmodule MazeTransformer do
   Finally, we draw the walls at the extreme right and bottom of the maze to
   complete it.
 
-  e.g.
-  The corridor represented by the number 1 has walls to the east, south
-  and west as follows:
+  The walls for each room are:
+  ```
+     1    2    3    4    5
+    # #  ###  # #  ###  #
+    # #  # #  # #  #    #
+    ###  # #  # #  ###  ###
 
-    |   |
-    |   |
-    + - +
+     6    7    8    9   10
+    ###  #    ###    #  ###
+    #    #      #    #    #
+    #    #    ###  ###    #
+
+    11   12   13   14   15
+      #  ###       ###
+      #
+      #  ###  ###
+  ```
   """
-  # Grass layer
+
+  def tile_for("layer1", x, y, width, height) when x == 1 or x == width or y == 1 or y == height,
+    do: 0
+
+  def tile_for("layer1", _, _, _, _), do: 11
+
+  # For the grass layer we simply put a blank row at the top and left
   def layer("layer1", _maze, args) do
-    {space, grass} = {0, 11}
-    base_height = args.height
-    base_width = args.width
-    room_width = args.hall_width + 1
+    grid_width = args.width * (args.hall_width + 1) + 2
+    grid_height = args.height * (args.hall_width + 1) + 2
 
-    grid_width = base_width * room_width + 2
-    grid_height = base_height * room_width + 2
-
-    [
-      repeat(grid_width, space),
-      1..(grid_height - 2)
-      |> Enum.map(fn _ ->
-        [space] ++ repeat(grid_width - 2, grass) ++ [space]
-      end),
-      repeat(grid_width, space)
-    ]
+    1..grid_width
+    |> Enum.map(fn x ->
+      1..grid_height
+      |> Enum.map(fn y ->
+        tile_for("layer1", x, y, grid_width, grid_height)
+      end)
+    end)
     |> List.flatten()
   end
 
-  # Wall bases
+  # for wall bases we want to calculate all the walls for
+  # each room, but make sure we don't double the thickness
+  # of each room's walls
   def layer("layer2", maze, args) do
     {space, wall} = {0, 331}
 
-    base_width = args.width
-    room_width = args.hall_width + 1
-    grid_width = base_width * room_width + 2
+    grid_width = args.width * (args.hall_width + 1) + 2
 
     [
       repeat(grid_width, space),
-      maze
-      |> Enum.map(fn row ->
-        ["top", "mid"]
-        |> Enum.map(fn type ->
-          case type do
-            "top" ->
-              [space] ++ transform_row(row, type, space, wall, args) ++ [wall]
+      Maze.tiles(maze, args)
+      |> Enum.map(fn tile ->
+        case tile.x do
+          1 ->
+            case tile.tile do
+              " " ->
+                [space, space]
 
-            _ ->
-              1..args.hall_width
-              |> Enum.map(fn _ ->
-                [space] ++ transform_row(row, type, space, wall, args) ++ [wall]
-              end)
-              |> List.flatten()
-          end
-        end)
-      end),
-      [space] ++ repeat(grid_width - 1, wall)
+              "#" ->
+                [space, wall]
+            end
+
+          _ ->
+            case tile.tile do
+              " " ->
+                [space]
+
+              "#" ->
+                [wall]
+            end
+        end
+      end)
     ]
     |> List.flatten()
   end
@@ -74,28 +88,29 @@ defmodule MazeTransformer do
   def layer("layer3", maze, args) do
     {space, wall} = {0, 321}
 
-    base_width = args.width
-    room_width = args.hall_width + 1
-    grid_width = base_width * room_width + 2
+    grid_width = args.width * (args.hall_width + 1) + 2
 
     [
-      maze
-      |> Enum.map(fn row ->
-        ["top", "mid"]
-        |> Enum.map(fn type ->
-          case type do
-            "top" ->
-              transform_row(row, type, space, wall, args) ++ [wall, space]
+      Maze.tiles(maze, args)
+      |> Enum.map(fn tile ->
+        if tile.x == grid_width - 1 do
+          case tile.tile do
+            " " ->
+              [space, space]
 
-            _ ->
-              1..args.hall_width
-              |> Enum.map(fn _ ->
-                transform_row(row, type, space, wall, args) ++ [wall, space]
-              end)
+            "#" ->
+              [wall, space]
           end
-        end)
+        else
+          case tile.tile do
+            " " ->
+              [space]
+
+            "#" ->
+              [wall]
+          end
+        end
       end),
-      repeat(grid_width - 1, wall) ++ [space],
       repeat(grid_width, space)
     ]
     |> List.flatten()
@@ -117,8 +132,8 @@ defmodule MazeTransformer do
           type: "actor1m",
           visible: true,
           width: 32,
-          x: 48.0,
-          y: 48.0
+          x: 64.0,
+          y: 64.0
         }
       ],
       opacity: 1,
@@ -134,7 +149,7 @@ defmodule MazeTransformer do
       color: "#ff0000",
       draworder: "topdown",
       name: "collision",
-      objects: collisions_for(maze, args),
+      objects: collision_list(maze, args),
       opacity: 1,
       type: "objectgroup",
       visible: true,
@@ -143,40 +158,20 @@ defmodule MazeTransformer do
     }
   end
 
-  def collisions_for(maze, args) do
-    base_width = args.width
-    room_width = args.hall_width + 1
-    grid_width = base_width * room_width + 2
+  def collision_list(maze, args) do
+    # The edge collisions are 1 square shorter than the normal grid
+    grid_width = args.width * (args.hall_width + 1) + 1
+    grid_height = args.height * (args.hall_width + 1) + 1
 
-    # we're going to reuse the base of the walls
-    # to create the collision grid
-    collision_grid = layer("layer2", maze, args)
+    edge_and_empty_tiles = fn t ->
+      t.tile == " " || t.x in [1, grid_width] || t.y in [1, grid_height]
+    end
 
-    # now we iterate through the wall bases and create
-    # collisions with the appropriate x & y coordinates
-    collision_grid
-    |> Enum.chunk_every(grid_width)
-    |> Enum.with_index(0)
-    |> Enum.map(fn {row, y} ->
-      row
-      |> Enum.with_index(0)
-      |> Enum.map(fn {col, x} ->
-        case col do
-          331 ->
-            [
-              %{
-                x: ( x - 0.5 ) * 32,
-                y: ( y - 0.5 ) * 32
-              }
-            ]
-          _ ->
-            []
-        end
-      end)
-    end)
-    |> List.flatten
-    |> Enum.with_index(1)
-    |> Enum.map(fn {coordinate, id} ->
+    internal_collisions = Maze.tiles(maze, args)
+    |> Enum.reject(edge_and_empty_tiles)
+    |> Enum.sort_by(&{&1.x, &1.y})
+    |> Enum.with_index(5)
+    |> Enum.map(fn {tile, id} ->
       %{
         height: 32,
         id: id,
@@ -185,24 +180,71 @@ defmodule MazeTransformer do
         type: "",
         visible: true,
         width: 32,
-        x: coordinate.x,
-        y: coordinate.y
-       }
+        x: tile.x * 32 - 16,
+        y: tile.y * 32 - 16
+      }
     end)
+
+    [internal_collisions, edge_collisions(args)]
+    |> List.flatten()
+  end
+
+  def edge_collisions(args) do
+    # The edge collisions are 1 square shorter than the normal grid
+    collisions_width = args.width * (args.hall_width + 1) + 1
+    collisions_height = args.height * (args.hall_width + 1) + 1
+
+    [
+      %{
+        height: 32,
+        id: 1,
+        name: "",
+        rotation: 0,
+        type: "",
+        visible: true,
+        width: collisions_width * 32,
+        x: 16,
+        y: 16
+      },
+      %{
+        height: collisions_height * 32,
+        id: 2,
+        name: "",
+        rotation: 0,
+        type: "",
+        visible: true,
+        width: 32,
+        x: 16,
+        y: 16
+      },
+      %{
+        height: 32,
+        id: 3,
+        name: "",
+        rotation: 0,
+        type: "",
+        visible: true,
+        width: collisions_width * 32,
+        x: 16,
+        y: collisions_height * 32 - 16
+      },
+      %{
+        height: collisions_height * 32,
+        id: 4,
+        name: "",
+        rotation: 0,
+        type: "",
+        visible: true,
+        width: 32,
+        x: collisions_width * 32 - 16,
+        y: 16
+      }
+    ]
   end
 
   def repeat(width, tile) do
     1..width
     |> Enum.map(fn _ -> tile end)
-  end
-
-  def transform_row(row, type, space, wall, args) do
-    row
-    |> Enum.map(fn room ->
-      room
-      |> transform_room(type, space, wall, args.hall_width)
-    end)
-    |> List.flatten()
   end
 
   # The room wall mappings are:
@@ -221,24 +263,76 @@ defmodule MazeTransformer do
   #     #
   #     #  ###  ###
 
-  # top section of rooms with walls hall_width + 1 in length
-  # this will never match the middle or bottom of rooms
-  def transform_room(room, "top", _, w, width) when room in [2, 4, 6, 8, 10, 12, 14] do
-    1..(width + 1)
-    |> Enum.map(fn _ -> w end)
-  end
+  @doc ~S"""
+  Returns the rooms with their coordinates for a maze
+  of given height and width.
 
-  # room sections with a wall on the left and a space equal to hall_width
-  def transform_room(room, _, s, w, width) when room in [1, 2, 3, 4, 5, 6, 7] do
-    right = 1..width |> Enum.map(fn _ -> s end)
+  Note: layer2 is the bases of each wall.
 
-    ([w] ++ right)
+  ## Examples
+
+  iex> MazeTransformer.all_rooms("layer2", [[6, 8], [5, 8]], %{hall_width: 2})
+  [{%{x: 1, y: 1}, 6}, {%{x: 4, y: 1}, 8}, {%{x: 1, y: 4}, 5}, {%{x: 4, y: 4}, 8}]
+
+  iex> MazeTransformer.all_rooms("layer2", [[4, 10, 2]], %{hall_width: 2})
+  [{%{x: 1, y: 1}, 4}, {%{x: 4, y: 1}, 10}, {%{x: 7, y: 1}, 2}]
+  """
+  def all_rooms("layer2", maze, args) do
+    maze
+    |> Enum.with_index(1)
+    |> Enum.map(fn {row, y} ->
+      row
+      |> Enum.with_index(1)
+      |> Enum.map(fn {room, x} ->
+        all_coordinates("layer2", room, args, x, y)
+      end)
+    end)
     |> List.flatten()
   end
 
-  # room sections that are nothing but space
-  def transform_room(room, _, s, _, width) when room in [8, 9, 10, 11, 12, 13, 14, 15] do
-    1..(width + 1)
-    |> Enum.map(fn _ -> s end)
+  @doc """
+  Get the coordinates for all rooms.
+
+  ## Examples
+
+  iex> MazeTransformer.all_coordinates("layer2", 2, %{width: 3, height: 2, hall_width: 2}, 2, 4)
+  {%{x: 4, y: 10}, 2}
+  """
+  def all_coordinates("layer2", room, args, x, y) do
+    {room_coordinates(x, y, args.hall_width), room}
+  end
+
+  @doc """
+  Get the coordinates for a particular roomw.
+
+  ## Examples
+
+  iex> MazeTransformer.room_coordinates(1, 1, 2)
+  %{x: 1, y: 1}
+
+  iex> MazeTransformer.room_coordinates(1, 3, 2)
+  %{x: 1, y: 7}
+
+  iex> MazeTransformer.room_coordinates(2, 3, 2)
+  %{x: 4, y: 7}
+  """
+  def room_coordinates(1, 1, _), do: %{x: 1, y: 1}
+
+  def room_coordinates(1, y, 1) do
+    %{x: 1, y: y * 2 - 1}
+  end
+
+  def room_coordinates(x, 1, 1) do
+    %{x: x * 2 - 1, y: 1}
+  end
+
+  def room_coordinates(x, y, 1) do
+    %{x: x * 2 - 1, y: y * 2 - 1}
+  end
+
+  def room_coordinates(x, y, width) do
+    new_x = x * (width + 1) - 2
+    new_y = y * (width + 1) - 2
+    %{x: new_x, y: new_y}
   end
 end
