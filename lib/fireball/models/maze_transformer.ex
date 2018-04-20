@@ -159,87 +159,91 @@ defmodule MazeTransformer do
   end
 
   def collision_list(maze, args) do
-    # The edge collisions are 1 square shorter than the normal grid
-    grid_width = args.width * (args.hall_width + 1) + 1
-    grid_height = args.height * (args.hall_width + 1) + 1
+    first_pass =
+      maze
+      |> polys(args)
+      |> Enum.group_by(&{&1.y})
+      |> Enum.map(fn {_y, row} ->
+        row
+        |> join_polys()
+      end)
+      |> List.flatten()
 
-    edge_and_empty_tiles = fn t ->
-      t.tile == " " || t.x in [1, grid_width] || t.y in [1, grid_height]
-    end
+    second_pass =
+      first_pass
+      |> Enum.reject(fn poly -> poly.width > 32 end)
+      |> Enum.group_by(&{&1.x})
+      |> Enum.map(fn {_x, column} ->
+        column
+        |> join_polys()
+      end)
+      |> List.flatten()
 
-    internal_collisions = Maze.tiles(maze, args)
-    |> Enum.reject(edge_and_empty_tiles)
-    |> Enum.sort_by(&{&1.x, &1.y})
-    |> Enum.with_index(5)
+    [
+      first_pass
+      |> Enum.filter(fn poly -> poly.width > 32 end),
+      second_pass
+    ]
+    |> List.flatten()
+    |> Enum.sort_by(&{&1.y, &1.x})
+    |> Enum.with_index(1)
     |> Enum.map(fn {tile, id} ->
       %{
-        height: 32,
+        height: tile.height,
         id: id,
         name: "",
         rotation: 0,
         type: "",
         visible: true,
-        width: 32,
-        x: tile.x * 32 - 16,
-        y: tile.y * 32 - 16
+        width: tile.width,
+        x: tile.x - 16,
+        y: tile.y - 16
       }
     end)
-
-    [internal_collisions, edge_collisions(args)]
     |> List.flatten()
   end
 
-  def edge_collisions(args) do
-    # The edge collisions are 1 square shorter than the normal grid
-    collisions_width = args.width * (args.hall_width + 1) + 1
-    collisions_height = args.height * (args.hall_width + 1) + 1
+  def polys(maze, args) do
+    empty_tiles = fn t -> t.tile == " " end
 
-    [
+    maze
+    |> Maze.tiles(args)
+    |> Enum.reject(empty_tiles)
+    |> Enum.sort_by(&{&1.x, &1.y})
+    |> Enum.map(fn tile ->
       %{
         height: 32,
-        id: 1,
-        name: "",
-        rotation: 0,
-        type: "",
-        visible: true,
-        width: collisions_width * 32,
-        x: 16,
-        y: 16
-      },
-      %{
-        height: collisions_height * 32,
-        id: 2,
-        name: "",
-        rotation: 0,
-        type: "",
-        visible: true,
         width: 32,
-        x: 16,
-        y: 16
-      },
-      %{
-        height: 32,
-        id: 3,
-        name: "",
-        rotation: 0,
-        type: "",
-        visible: true,
-        width: collisions_width * 32,
-        x: 16,
-        y: collisions_height * 32 - 16
-      },
-      %{
-        height: collisions_height * 32,
-        id: 4,
-        name: "",
-        rotation: 0,
-        type: "",
-        visible: true,
-        width: 32,
-        x: collisions_width * 32 - 16,
-        y: 16
+        x: tile.x * 32,
+        y: tile.y * 32
       }
-    ]
+    end)
+  end
+
+  def join_polys(polys) do
+    chunk_fun = fn
+      i, [] ->
+        {:cont, i}
+
+      %{width: iw, x: ix}, %{height: ah, width: aw, x: ax, y: ay}
+      when ax + aw == ix ->
+        {:cont, %{height: ah, width: aw + iw, x: ax, y: ay}}
+
+      %{height: ih, y: iy}, %{height: ah, width: aw, x: ax, y: ay}
+      when ay + ah == iy ->
+        {:cont, %{height: ah + ih, width: aw, x: ax, y: ay}}
+
+      i, acc ->
+        {:cont, acc, i}
+    end
+
+    after_fun = fn
+      [] -> {:cont, []}
+      acc -> {:cont, acc, []}
+    end
+
+    polys
+    |> Enum.chunk_while([], chunk_fun, after_fun)
   end
 
   def repeat(width, tile) do
