@@ -102,8 +102,7 @@ xhr.onload = function() {
         type: "tmx",
         format: "json",
         data: xhr.response.data.generateLevel
-    });
-    return;
+    }, function () {});
 };
 xhr.send(JSON.stringify({
     query: query,
