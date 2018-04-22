@@ -33,10 +33,8 @@ var g_resources = [
     }
 ];
 
-var height = 10;
-var width = 10;
-var hall_width = 2;
-var query = `
+function generateMaze(loader, width, height, hall_width) {
+    var query = `
 query GenerateLevel($height: Int!, $width: Int!, $hallWidth: Int){
   generateLevel(height: $height, width: $width, hallWidth: $hallWidth) {
     height
@@ -90,28 +88,29 @@ query GenerateLevel($height: Int!, $width: Int!, $hallWidth: Int){
 }
 `;
 
-// download level data
-var xhr = new XMLHttpRequest();
-xhr.responseType = 'json';
-xhr.open("POST", "/graphql", true);
-xhr.setRequestHeader("Content-Type", "application/json");
-xhr.setRequestHeader("Accept", "application/json");
-xhr.onload = function() {
-    me.loader.load({
-        name: "level_2",
-        type: "tmx",
-        format: "json",
-        data: xhr.response.data.generateLevel
-    }, function () {});
-};
-xhr.send(JSON.stringify({
-    query: query,
-    variables: {
-        height: height,
-        width: width,
-        hallWidth: hall_width
-    }
-}));
+    // download level data
+    var xhr = new XMLHttpRequest();
+    xhr.responseType = 'json';
+    xhr.open("POST", "/graphql", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.onload = function() {
+        loader.load({
+            name: "level_2",
+            type: "tmx",
+            format: "json",
+            data: xhr.response.data.generateLevel
+        }, function() {});
+    };
+    xhr.send(JSON.stringify({
+        query: query,
+        variables: {
+            height: height,
+            width: width,
+            hallWidth: hall_width
+        }
+    }));
+}
 
 var game = {
 
@@ -136,8 +135,8 @@ var game = {
         };
 
         // init the video
-        if (!me.video.init(window.innerWidth / 2, window.innerHeight / 2, webGLOpts)) {
-            if (!me.video.init((window.innerWidth / 3), (window.innerHeight / 3) - 12, canvasOpts)) {
+        if (!me.video.init(game.nearestPow2(window.innerWidth / 2), game.nearestPow2(window.innerHeight / 2), webGLOpts)) {
+            if (!me.video.init(game.nearestPow2(window.innerWidth / 3), game.nearestPow2(window.innerHeight / 3) - 12, canvasOpts)) {
                 alert("Your browser does not support HTML5 canvas.");
                 return;
             }
@@ -148,6 +147,11 @@ var game = {
 
         // set all ressources to be loaded
         me.loader.preload(g_resources, this.loaded.bind(this));
+        generateMaze(me.loader, 10, 10, 2);
+    },
+
+    nearestPow2: function(size) {
+        return Math.pow( 2, Math.round( Math.log( size ) / Math.log( 2 ) ) );
     },
 
 
