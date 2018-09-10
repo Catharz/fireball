@@ -112,6 +112,93 @@ query GenerateLevel($height: Int!, $width: Int!, $hallWidth: Int){
     }));
 }
 
+var LightingCompositor = me.WebGLRenderer.Compositor.extend(
+    {
+        init: function(renderer) {
+            var gl = renderer.gl;
+            this.length = 0;
+            this.units = [];
+            this.maxTextures = Math.min(24, gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS));
+            this.renderer = renderer;
+            this.gl = renderer.gl;
+            this.matrix = renderer.currentTransform;
+            this.color = renderer.currentColor;
+            this.uMatrix = new me.Matrix2d();
+
+            // setup the shader
+            var vertShader = document.getElementById("player-vertex-shader").text;
+            var fragShader = document.getElementById("player-fragment-shader").text;
+            this.playerLightingShader = me.video.shader.createShader(me.video.renderer.compositor.gl,
+                                                                     vertShader,
+                                                                     fragShader);
+            this.shader = this.playerLightingShader.handle;
+            this.sb = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.sb);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                MAX_LENGTH * ELEMENT_OFFSET * ELEMENTS_PER_QUAD,
+                gl.STREAM_DRAW
+            );
+
+            this.sbSize = 256;
+            this.sbIndex = 0;
+
+            // Quad stream buffer
+            this.stream = new Float32Array(
+                this.sbSize * ELEMENT_SIZE * ELEMENTS_PER_QUAD
+            );
+
+            // Index buffer
+            this.ib = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ib);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.createIB(), gl.STATIC_DRAW);
+
+            // Bind attribute pointers for quad shader
+            gl.vertexAttribPointer(
+                this.quadShader.attributes.aVertex,
+                VERTEX_SIZE,
+                gl.FLOAT,
+                false,
+                ELEMENT_OFFSET,
+                VERTEX_OFFSET
+            );
+            gl.vertexAttribPointer(
+                this.quadShader.attributes.aColor,
+                COLOR_SIZE,
+                gl.FLOAT,
+                false,
+                ELEMENT_OFFSET,
+                COLOR_OFFSET
+            );
+            gl.vertexAttribPointer(
+                this.quadShader.attributes.aTexture,
+                TEXTURE_SIZE,
+                gl.FLOAT,
+                false,
+                ELEMENT_OFFSET,
+                TEXTURE_OFFSET
+            );
+            gl.vertexAttribPointer(
+                this.quadShader.attributes.aRegion,
+                REGION_SIZE,
+                gl.FLOAT,
+                false,
+                ELEMENT_OFFSET,
+                REGION_OFFSET
+            );
+
+            this.reset();
+            this.setProjection(gl.canvas.width, gl.canvas.height);
+
+            // Initialize clear color and blend function
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
+        }
+    }
+);
+
 var game = {
 
     /**
@@ -124,7 +211,8 @@ var game = {
             antiAlias: true,
             doubleBuffering: true,
             scale: "auto",
-            scaleMethod: "fit"
+            scaleMethod: "fit",
+            compositor: me.WebGLRenderer.Compositor
         };
 
         var canvasOpts = {
@@ -141,9 +229,6 @@ var game = {
                 return;
             }
         }
-
-        // setup the player
-        me.game.data = {};
 
         // set all ressources to be loaded
         me.loader.preload(g_resources, this.loaded.bind(this));
@@ -167,7 +252,6 @@ var game = {
 
         // register our objects entity in the object pool
         me.pool.register("mainPlayer", game.PlayerEntity);
-        game.PlayerEntity.animation = "walk_south";
 
         // switch to PLAY state
         me.state.change(me.state.PLAY);
@@ -274,7 +358,6 @@ game.PlayerEntity = me.Entity.extend({
             this._super(me.Entity, "update", [dt]);
             return true;
         }
-        return false;
     },
 
     /**

@@ -6,7 +6,7 @@ defmodule RecursiveBacktrack do
   https://github.com/craigp/mazes/blob/master/lib/recursive_backtrack.ex
   """
 
-  @spec run(Integer, Integer, Boolean) :: List
+  @spec run(Boolean, Integer, Integer) :: List
   def run(display \\ false, width \\ 10, height \\ 10) do
     # clear the screen
     if display, do: IO.write("\e[2J")
@@ -20,7 +20,7 @@ defmodule RecursiveBacktrack do
         end)
       end)
 
-    level = carve_passages_from(0, 0, grid, display)
+    level = carve_passages_from(grid, 0, 0, display)
     if display, do: level |> print
     level
   end
@@ -47,7 +47,7 @@ defmodule RecursiveBacktrack do
     bw
   end
 
-  def carve_passages_from(cx, cy, grid, display) do
+  def carve_passages_from(grid, cx, cy, display) do
     directions()
     |> Enum.shuffle()
     |> Enum.reduce(grid, fn {_card, {bw, dx, dy}} = direction, grid ->
@@ -57,7 +57,7 @@ defmodule RecursiveBacktrack do
       current_cell = Enum.at(current_row, cx)
       other_row = Enum.at(grid, ny)
 
-      if other_row do
+      grid = if other_row do
         other_cell = Enum.at(other_row, nx)
 
         if ny in 0..(length(grid) - 1) and nx in 0..(length(other_row) - 1) and other_cell == 0 do
@@ -69,15 +69,20 @@ defmodule RecursiveBacktrack do
           # get it again, might be the same row and changed
           other_row = Enum.at(grid, ny)
           other_row = List.replace_at(other_row, nx, other_cell)
-          grid = List.replace_at(grid, ny, other_row)
 
           if display do
             print(grid)
             :timer.sleep(25)
           end
 
-          grid = carve_passages_from(nx, ny, grid, display)
+          grid
+          |> List.replace_at(ny, other_row)
+          |> carve_passages_from(nx, ny, display)
+        else
+          grid
         end
+      else
+        grid
       end
 
       grid

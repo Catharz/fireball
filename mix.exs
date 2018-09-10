@@ -42,7 +42,7 @@ defmodule Fireball.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:absinthe, "~> 1.4.6"},
+      {:absinthe, "~> 1.4.10"},
       {:absinthe_plug, "~> 1.4.2"},
       {:absinthe_phoenix, "~> 1.4.2"},
       {:timex, "~> 3.2.1"}

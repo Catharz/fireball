@@ -23,5 +23,5 @@ export var App = {
     run: function(){
         console.log("Hello!")
     }
-}
+};
 App.run()

@@ -84,6 +84,14 @@ defmodule FireballWeb.Schema.LevelTypes do
     field :source, non_null(:string)
   end
 
+  object :row do
+    field :rooms, list_of(:integer)
+  end
+
+  object :simple_level do
+    field :rows, list_of(:row)
+  end
+
   object :level_generators do
     field :generate_level, non_null(:level) do
       arg :width, non_null(:integer)
@@ -91,6 +99,20 @@ defmodule FireballWeb.Schema.LevelTypes do
       arg :hall_width, :integer, default_value: 1
 
       resolve &Resolver.generate_maze/2
+    end
+
+    field :generate_simple_level, non_null(:simple_level) do
+      arg :width, non_null(:integer)
+      arg :height, non_null(:integer)
+
+      resolve fn args, _ ->
+        rows = RecursiveBacktrack.run(false, args.width, args.height)
+        |> Enum.map(fn row ->
+          %Row{rooms: Enum.map(row, fn id -> id end)}
+        end)
+
+        {:ok, %SimpleLevel{rows: rows}}
+      end
     end
   end
 end
