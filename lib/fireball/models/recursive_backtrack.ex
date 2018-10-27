@@ -57,33 +57,34 @@ defmodule RecursiveBacktrack do
       current_cell = Enum.at(current_row, cx)
       other_row = Enum.at(grid, ny)
 
-      grid = if other_row do
-        other_cell = Enum.at(other_row, nx)
+      grid =
+        if other_row do
+          other_cell = Enum.at(other_row, nx)
 
-        if ny in 0..(length(grid) - 1) and nx in 0..(length(other_row) - 1) and other_cell == 0 do
-          current_cell = Bitwise.bor(current_cell, bw)
-          other_cell = Bitwise.bor(other_cell, opposite(direction))
-          current_row = List.replace_at(current_row, cx, current_cell)
-          grid = List.replace_at(grid, cy, current_row)
+          if ny in 0..(length(grid) - 1) and nx in 0..(length(other_row) - 1) and other_cell == 0 do
+            current_cell = Bitwise.bor(current_cell, bw)
+            other_cell = Bitwise.bor(other_cell, opposite(direction))
+            current_row = List.replace_at(current_row, cx, current_cell)
+            grid = List.replace_at(grid, cy, current_row)
 
-          # get it again, might be the same row and changed
-          other_row = Enum.at(grid, ny)
-          other_row = List.replace_at(other_row, nx, other_cell)
+            # get it again, might be the same row and changed
+            other_row = Enum.at(grid, ny)
+            other_row = List.replace_at(other_row, nx, other_cell)
 
-          if display do
-            print(grid)
-            :timer.sleep(25)
+            if display do
+              print(grid)
+              :timer.sleep(25)
+            end
+
+            grid
+            |> List.replace_at(ny, other_row)
+            |> carve_passages_from(nx, ny, display)
+          else
+            grid
           end
-
-          grid
-          |> List.replace_at(ny, other_row)
-          |> carve_passages_from(nx, ny, display)
         else
           grid
         end
-      else
-        grid
-      end
 
       grid
     end)

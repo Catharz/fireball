@@ -2,6 +2,7 @@ defmodule FireballWeb.Schema.LevelTypes do
   use Absinthe.Schema.Notation
 
   alias FireballWeb.Resolvers.LevelResolver, as: Resolver
+  require Logger
 
   @desc "A level."
   object :level do
@@ -85,7 +86,7 @@ defmodule FireballWeb.Schema.LevelTypes do
   end
 
   object :row do
-    field :rooms, list_of(:integer)
+    field :columns, list_of(:integer)
   end
 
   object :simple_level do
@@ -101,15 +102,18 @@ defmodule FireballWeb.Schema.LevelTypes do
       resolve &Resolver.generate_maze/2
     end
 
-    field :generate_simple_level, non_null(:simple_level) do
+    field :simple_level, non_null(:simple_level) do
       arg :width, non_null(:integer)
       arg :height, non_null(:integer)
 
       resolve fn args, _ ->
-        rows = RecursiveBacktrack.run(false, args.width, args.height)
-        |> Enum.map(fn row ->
-          %Row{rooms: Enum.map(row, fn id -> id end)}
-        end)
+        rows =
+          RecursiveBacktrack.run(false, args.width, args.height)
+          |> Enum.map(fn column ->
+            %Row{columns: Enum.map(column, fn id -> id end)}
+          end)
+
+        Logger.debug("rows: #{inspect(rows)}")
 
         {:ok, %SimpleLevel{rows: rows}}
       end

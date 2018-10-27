@@ -1,3 +1,3 @@
 defmodule Row do
-  defstruct [:rooms]
+  defstruct [:columns]
 end

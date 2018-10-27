@@ -117,7 +117,7 @@ defmodule Maze do
       |> Enum.with_index(0)
       |> Enum.map(fn {row, add_y} ->
         row
-        |> String.graphemes
+        |> String.graphemes()
         |> Enum.with_index(0)
         |> Enum.map(fn {tile, add_x} ->
           %{x: loc.x + add_x, y: loc.y + add_y, tile: tile}
@@ -131,25 +131,27 @@ defmodule Maze do
     # missing. Reverse sorting on "#" vs " ", followed by
     # removing duplicate x,y tiles fixes it.
     # There must be a bug elsewhere.
-    |> Enum.sort_by(&(&1.tile))
-    |> Enum.reverse
+    |> Enum.sort_by(& &1.tile)
+    |> Enum.reverse()
     |> Enum.uniq_by(&{&1.y, &1.x})
     |> Enum.sort_by(&{&1.y, &1.x})
   end
 
   def to_s(maze, args) do
-    text = tiles(maze, args)
-    |> Enum.map(fn tile ->
-      case tile.x do
-        1 ->
-          "\n" <> tile.tile
-        _ ->
-          tile.tile
-      end
-    end)
-    |> Enum.join()
+    text =
+      tiles(maze, args)
+      |> Enum.map(fn tile ->
+        case tile.x do
+          1 ->
+            "\n" <> tile.tile
 
-    IO.puts text
+          _ ->
+            tile.tile
+        end
+      end)
+      |> Enum.join()
+
+    IO.puts(text)
     text
   end
 end

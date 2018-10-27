@@ -7,8 +7,8 @@ defmodule FireballWeb.Resolvers.LevelResolver do
      %Level{
        backgroundcolor: "#00007c",
        infinite: false,
-       height: (args.height * room_width) + 2,
-       width: (args.width * room_width) + 2,
+       height: args.height * room_width + 2,
+       width: args.width * room_width + 2,
        nextobjectid: 1,
        layers: gen_layers(args),
        orientation: "isometric",
@@ -19,13 +19,12 @@ defmodule FireballWeb.Resolvers.LevelResolver do
        tilesets: tilesets(),
        type: "map",
        version: 1
-     }
-    }
+     }}
   end
 
   def gen_layers(args) do
     maze = RecursiveBacktrack.run(false, args.width, args.height)
-    IO.inspect maze
+    IO.inspect(maze)
 
     ["layer1", "layer2", "player", "layer3", "collision"]
     |> Enum.map(fn layer ->
@@ -37,8 +36,8 @@ defmodule FireballWeb.Resolvers.LevelResolver do
     data = MazeTransformer.layer(layer, maze, args)
 
     room_width = args.hall_width + 1
-    height = (args.height * room_width) + 2
-    width = (args.width * room_width) + 2
+    height = args.height * room_width + 2
+    width = args.width * room_width + 2
 
     %TileLayer{
       data: data,
